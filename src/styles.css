@@ -10,7 +10,7 @@
 
   /* Ring effect variables */
   --ring-gap: 3px;     /* black gap between image and blue ring */
-  --ring-width: 2px;   /* thickness of blue ring */
+  --ring-width: 3px;   /* thickness of blue ring */
 }
 
 /* Global */
@@ -91,7 +91,7 @@ body {
 /* Active state: black gap + thin blue ring */
 .card.isActive {
   outline: none;
-  border-radius: 6px;
+  border-radius: 1.87px;
   box-shadow:
           0 0 0 var(--ring-gap) #000,                                   /* black gap */
           0 0 0 calc(var(--ring-gap) + var(--ring-width)) var(--accent);/* blue ring */
