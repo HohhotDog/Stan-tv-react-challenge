@@ -1,0 +1,52 @@
+{
+  "programs": [
+    {
+      "id": "1",
+      "title": "The Blue Mountain",
+      "image": "https://picsum.photos/id/1018/640/360",
+      "overview": "A breathtaking journey through winding trails and misty peaks."
+    },
+    {
+      "id": "2",
+      "title": "City Nights",
+      "image": "https://picsum.photos/id/1015/640/360",
+      "overview": "A neon-soaked noir exploring the city that never sleeps."
+    },
+    {
+      "id": "3",
+      "title": "Waves",
+      "image": "https://picsum.photos/id/1016/640/360",
+      "overview": "A meditative look at the ocean's rhythms and the surfers who chase them."
+    },
+    {
+      "id": "4",
+      "title": "Fields of Gold",
+      "image": "https://picsum.photos/id/1025/640/360",
+      "overview": "Coming of age in a rural town with big dreams."
+    },
+    {
+      "id": "5",
+      "title": "Orbit",
+      "image": "https://picsum.photos/id/1020/640/360",
+      "overview": "A sci\u2011fi mystery set aboard a deep space research station."
+    },
+    {
+      "id": "6",
+      "title": "Hidden Streets",
+      "image": "https://picsum.photos/id/1035/640/360",
+      "overview": "The untold stories of the alleyways and the people who live there."
+    },
+    {
+      "id": "7",
+      "title": "Forest Light",
+      "image": "https://picsum.photos/id/1043/640/360",
+      "overview": "Nature slow TV: sunlight, wind, and whispering leaves."
+    },
+    {
+      "id": "8",
+      "title": "Edge of Winter",
+      "image": "https://picsum.photos/id/1056/640/360",
+      "overview": "A survival drama in the far north."
+    }
+  ]
+}
