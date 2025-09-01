@@ -5,7 +5,7 @@ module.exports = {
   },
   moduleNameMapper: {
     '\\.(css)$': 'identity-obj-proxy',
-    '\\.(svg)$': '<rootDir>/tests/svgMock.js'
+    '\\.(svg)$': '<rootDir>/__tests__/svgMock.js'
   },
   setupFilesAfterEnv: ['@testing-library/jest-dom']
 };
