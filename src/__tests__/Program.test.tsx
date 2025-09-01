@@ -1,8 +1,22 @@
 // src/__tests__/Program.test.tsx
 import React from 'react';
-import { screen, waitFor, fireEvent } from '@testing-library/react';
+import { screen, waitFor, fireEvent, render } from '@testing-library/react';
 import ProgramPage from '../pages/Program';
-import { renderWithProviders } from '../testUtils';
+import { DataProvider } from '../dataContext';
+import { MemoryRouter, Routes, Route } from 'react-router-dom';
+
+// Silence React Router future flag warnings in tests
+const originalWarn = console.warn;
+beforeAll(() => {
+  console.warn = (...args: any[]) => {
+    const msg = String(args[0] ?? '');
+    if (msg.includes('React Router Future Flag Warning')) return;
+    originalWarn(...args);
+  };
+});
+afterAll(() => {
+  console.warn = originalWarn;
+});
 
 // Mock useNavigate to capture back navigation and any route jumps
 const mockNavigate = jest.fn();
@@ -28,8 +42,7 @@ const programs = [
     id: '2',
     title: 'Dr Death',
     image: 'https://example.com/b.jpg',
-    overview:
-        'Terrifying true story of Dr. Christopher Duntsch...',
+    overview: 'Terrifying true story of Dr. Christopher Duntsch...',
     rating: 'MA 15+',
     year: 2021,
     genre: 'Drama',
@@ -38,50 +51,56 @@ const programs = [
   },
 ];
 
-// When navigating directly to Program and Home not visited, component will fetch
+// Helper: render ProgramPage at /program/:id with DataProvider + MemoryRouter
+function renderProgramAt(path: string) {
+  return render(
+      <DataProvider>
+        <MemoryRouter initialEntries={[path]}>
+          <Routes>
+            <Route path="/program/:id" element={<ProgramPage />} />
+          </Routes>
+        </MemoryRouter>
+      </DataProvider>
+  );
+}
+
+// Ensure fetch exists and is a mock each test
+beforeEach(() => {
+  (global.fetch as unknown as jest.Mock) = jest.fn();
+  mockNavigate.mockReset();
+});
+
+afterEach(() => {
+  (global.fetch as jest.Mock).mockReset();
+});
+
 function mockFetchOkList() {
-  (global.fetch as jest.Mock) = jest.fn().mockResolvedValue({
+  (global.fetch as jest.Mock).mockResolvedValue({
     ok: true,
     json: async () => ({ programs }),
   });
 }
 
 describe('Program page', () => {
-  beforeEach(() => {
-    jest.spyOn(global, 'fetch');
-    mockNavigate.mockReset();
-  });
-
-  afterEach(() => {
-    (global.fetch as jest.Mock).mockRestore();
-  });
-
   test('lazy loads when Home not visited: shows loading then renders meta line', async () => {
     mockFetchOkList();
 
-    // Directly route to /program/2 with MemoryRouter
-    renderWithProviders(<ProgramPage />, {
-      router: { initialEntries: ['/program/2'] },
-    });
+    renderProgramAt('/program/2');
 
-    // loading skeleton
+    // loading skeleton appears
     expect(screen.getByTestId('program-loading')).toBeInTheDocument();
 
     // After fetch, title + meta should appear
     await waitFor(() => {
       expect(screen.getByRole('heading', { name: /dr death/i })).toBeInTheDocument();
     });
-
-    // Meta line built from rating/year/genre/language; rating spaces compacted
     expect(screen.getByText(/MA15\+ \| 2021 \| Drama \| English/i)).toBeInTheDocument();
   });
 
   test('error state on fetch failure', async () => {
-    (global.fetch as jest.Mock) = jest.fn().mockRejectedValue(new Error('boom'));
+    (global.fetch as jest.Mock).mockRejectedValue(new Error('boom'));
 
-    renderWithProviders(<ProgramPage />, {
-      router: { initialEntries: ['/program/2'] },
-    });
+    renderProgramAt('/program/2');
 
     await waitFor(() => {
       expect(
@@ -93,11 +112,8 @@ describe('Program page', () => {
   test('Backspace navigates back', async () => {
     mockFetchOkList();
 
-    renderWithProviders(<ProgramPage />, {
-      router: { initialEntries: ['/program/2'] },
-    });
+    renderProgramAt('/program/2');
 
-    // Wait until content renders
     await waitFor(() => {
       expect(screen.getByRole('heading', { name: /dr death/i })).toBeInTheDocument();
     });
