@@ -3,7 +3,7 @@ import './styles.css';
 import { BrowserRouter, Routes, Route, NavLink } from 'react-router-dom';
 import Home from './pages/Home';
 import ProgramPage from './pages/Program';
-import Logo from './assets/logo.svg';
+import Logo from '../public/logo.svg';
 import { DataProvider } from './dataContext';
 
 const Shell: React.FC<{ children: React.ReactNode }> = ({ children }) => {

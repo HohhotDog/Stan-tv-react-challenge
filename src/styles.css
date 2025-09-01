@@ -1,66 +1,125 @@
 :root {
+  /* Colors */
   --bg: #000000;
   --fg: #ffffff;
   --muted: #9aa0a6;
   --accent: #2ea8ff;
 
-  /* Card sizing variables (2:3 poster) */
-  --card-w: 210px;
-  --card-gap: 14px;
+  /* Typography (defaults -> 1080p-like; override in media queries) */
+  --ff-base: 'Open Sans', system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+  --fs-nav: 28px;        /* top nav items */
+  --fw-nav: 800;
 
-  /* Ring effect variables */
-  --ring-gap: 3px;     /* black gap between image and blue ring */
-  --ring-width: 3px;   /* thickness of blue ring */
+  --fs-title: 56px;      /* program title / big headings */
+  --fw-title: 700;
+
+  --fs-meta: 22px;       /* MA15+ | 2021 | ... */
+  --fw-meta: 600;
+
+  --fs-body: 20px;       /* overview paragraph & general text */
+  --fw-body: 400;
+
+  /* Card sizing (2:3 poster) */
+  --card-w: 220px;       /* default for ~1080p */
+  --card-gap: 16px;
+
+  /* Ring effect around active card */
+  --ring-gap: 3px;       /* black gap between image and blue ring */
+  --ring-width: 3px;     /* thickness of blue ring */
+
+  /* Spacing */
+  --pad-x: 64px;         /* horizontal page padding */
+  --topbar-gap: 70px;    /* logo <-> nav gap */
+  --nav-gap: 56px;       /* nav item gap */
 }
 
-/* Global */
+/* ---------- Responsive presets (override variables only) ---------- */
+
+/* 720p target (~1280×720): smaller typography and card width */
+@media (max-width: 1366px) {
+  :root {
+    /* Vars for 720p */
+    --fs-nav: 24px;
+    --fs-title: 46px;
+    --fs-meta: 19px;
+    --fs-body: 18px;
+
+    --card-w: 200px;
+    --card-gap: 14px;
+
+    --pad-x: 48px;
+    --topbar-gap: 56px;
+    --nav-gap: 44px;
+  }
+}
+
+/* 1080p target (≥ 1600px 宽认为接近 1920×1080): 稍大一些 */
+@media (min-width: 1600px) {
+  :root {
+    /* Vars for 1080p */
+    --fs-nav: 30px;
+    --fs-title: 60px;
+    --fs-meta: 24px;
+    --fs-body: 21px;
+
+    --card-w: 230px;
+    --card-gap: 16px;
+
+    --pad-x: 72px;
+    --topbar-gap: 72px;
+    --nav-gap: 60px;
+  }
+}
+
+/* ---------- Global ---------- */
 html, body, #root { height: 100%; }
 body {
   margin: 0;
   background: var(--bg);
   color: var(--fg);
-  font-family: 'Open Sans', system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+  font-family: var(--ff-base);
 }
 
-/* Header: larger logo, nav close to it, heavier type and spacing like the ref */
+/* ---------- Topbar ---------- */
 .topbar {
   display: flex;
   align-items: center;
-  gap: 70px;                 /* spacing between logo and nav */
-  padding: 20px 64px;
-
+  gap: var(--topbar-gap);      /* nav sits close to logo */
+  padding: 20px var(--pad-x);
+  /* no border line to match the reference */
 }
 .brand img {
-  width: 160px;              /* larger logo */
+  width: 160px;                /* logo size stays visually close to the comp */
   height: 60px;
   display: block;
 }
 .nav {
   display: flex;
   align-items: center;
-  gap: 56px;                 /* spacing between nav items */
+  gap: var(--nav-gap);
 }
 .nav a {
   color: #bdbdbd;
   text-decoration: none;
-  font-weight: 800;          /* bolder */
-  font-size: 23px;           /* bigger, matches reference weight */
+  font-weight: var(--fw-nav);
+  font-size: var(--fs-nav);
   letter-spacing: 0.2px;
 }
 .nav a.active { color: #ffffff; }
 
+/* ---------- Page container ---------- */
 .container {
-  padding: 28px 64px 40px;
+  padding: 28px var(--pad-x) 40px;
   max-width: 1900px;
   margin: 0 auto;
 }
 
-/* Carousel viewport: show 5 full cards + 20% of the next one */
+/* ---------- Carousel ---------- */
 .carousel {
   position: relative;
   overflow: hidden;
   padding: 8px 0;
-  /* 5 * (card + gap) + 0.2 * card  */
+  /* show 5 full + 20% next */
   max-width: calc(5 * (var(--card-w) + var(--card-gap)) + 0.2 * var(--card-w));
 }
 .carousel-track {
@@ -69,14 +128,14 @@ body {
   align-items: stretch;
 }
 
-/* Card: square corners */
+/* ---------- Card ---------- */
 .card {
   width: var(--card-w);
   height: calc(var(--card-w) * 1.5);  /* 2:3 ratio */
   border-radius: 0;                   /* square corners */
   background: #111;
   overflow: hidden;
-  border: none;                       /* no faint border */
+  border: none;
   position: relative;
   transition: transform .12s ease, box-shadow .12s ease, outline .12s ease;
 }
@@ -87,18 +146,18 @@ body {
   display: block;
   border-radius: 0;                   /* square image corners */
 }
-
-/* Active state: black gap + thin blue ring */
+/* Active: black gap + blue ring; ring can be tuned by vars */
 .card.isActive {
   outline: none;
-  border-radius: 1.87px;
+  /* tiny ring rounding only (card itself stays square) */
+  border-radius: 2px;
   box-shadow:
           0 0 0 var(--ring-gap) #000,                                   /* black gap */
           0 0 0 calc(var(--ring-gap) + var(--ring-width)) var(--accent);/* blue ring */
-  transform: translateZ(0) scale(1.01);                           /* subtle enlargement */
+  transform: translateZ(0) scale(1.01);
 }
 
-/* Error text */
+/* ---------- Error ---------- */
 .errorBox {
   margin-top: 48px;
   color: #bdbdbd;
@@ -106,16 +165,7 @@ body {
   font-weight: 700;
 }
 
-/* Footer */
-.footer {
-  margin-top: auto;
-  padding: 16px 24px;
-  font-size: 12px;
-  color: var(--muted);
-
-}
-
-/* Skeleton base */
+/* ---------- Skeleton ---------- */
 .skeleton {
   background: #3d3d3d;
   border-radius: 6px;
@@ -132,7 +182,7 @@ body {
 }
 @keyframes shimmer { 100% { transform: translateX(100%); } }
 
-/* Home loading blocks (home-loading.jpg) */
+/* Home loading blocks */
 .homeLoadingGrid {
   display: grid;
   grid-template-columns: 420px 1fr;
@@ -145,7 +195,7 @@ body {
 .homeLoading-lineMd { width: 820px; height: 48px; margin-bottom: 16px; }
 .homeLoading-hero { width: 1200px; max-width: 100%; height: 280px; }
 
-/* Program layout and skeleton (program-loading.jpg) */
+/* ---------- Program page ---------- */
 .programGrid {
   display: grid;
   grid-template-columns: 360px 1fr;
@@ -153,6 +203,37 @@ body {
   align-items: start;
 }
 .programPoster { width: 360px; height: 540px; object-fit: cover; }
-.programTitle { font-size: 64px; font-weight: 700; margin: 0 0 16px 0; }
-.programMeta { color: #bdbdbd; font-size: 24px; font-weight: 700; margin-bottom: 24px; }
-.programOverview { font-size: 22px; line-height: 1.5; color: #e0e0e0; }
+
+/* Use typography variables here so you can tweak freely */
+.programTitle {
+  font-family: var(--ff-base);
+  font-size: var(--fs-title);
+  font-weight: var(--fw-title);
+  line-height: 1.15;
+  margin: 0 0 12px;
+}
+.programMeta {
+  font-family: var(--ff-base);
+  font-size: var(--fs-meta);
+  font-weight: var(--fw-meta);
+  color: #bdbdbd;
+  margin-bottom: 20px;
+  letter-spacing: 0.3px;
+}
+.programOverview {
+  font-family: var(--ff-base);
+  font-size: var(--fs-body);
+  font-weight: var(--fw-body);
+  line-height: 1.6;
+  color: #ffffff;
+  max-width: 1000px;
+}
+
+/* Program page: make poster shrink a bit on 720p */
+@media (max-width: 1366px) {
+  .programGrid {
+    grid-template-columns: 320px 1fr;
+    gap: 32px;
+  }
+  .programPoster { width: 320px; height: 480px; }
+}
