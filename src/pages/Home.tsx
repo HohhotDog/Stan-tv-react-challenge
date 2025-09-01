@@ -1,52 +1,61 @@
+// src/pages/Home.tsx
 import React, { useEffect, useState } from 'react';
-import '../styles.css';
+import { useNavigate } from 'react-router-dom';
+import { useData, Program } from '../dataContext';
 import { Carousel } from '../components/Carousel';
 import { useKeyboardNav } from '../hooks_useKeyboardNav';
-import type { DataShape, Program } from '../types';
-import { useNavigate } from 'react-router-dom';
-import { useData } from '../dataContext';
 
 type FetchState = 'idle' | 'loading' | 'success' | 'error';
 
-function normalizePrograms(raw: any): Program[] {
-    // accept several common shapes: { programs: [...] } | { items: [...] } | [...]
-    const arr =
+/* Normalize various data.json shapes into { programs } and include meta fields */
+function normalize(raw: any): { programs: Program[] } {
+    const arr: any[] =
         Array.isArray(raw?.programs) ? raw.programs :
-            Array.isArray(raw?.items) ? raw.items :
-                Array.isArray(raw) ? raw : [];
+            Array.isArray(raw?.items)    ? raw.items    :
+                Array.isArray(raw?.entries)  ? raw.entries  :
+                    Array.isArray(raw)           ? raw          : [];
 
-    return arr
-        .map((it: any, idx: number) => {
-            const id = it.id ?? it.programId ?? idx + 1;
-            const title = it.title ?? it.name ?? it.label ?? 'Untitled';
-            const image = it.image ?? it.poster ?? it.img ?? it.cover ?? '';
-            const overview = it.overview ?? it.description ?? '';
-            return { id: String(id), title: String(title), image: String(image), overview: String(overview) } as Program;
-        })
-        .filter((p: Program) => p.image); // require image to render a card
+    const programs: Program[] = arr.map((it: any, i: number) => ({
+        id: String(it.id ?? it.programId ?? it.slug ?? i + 1),
+        title: String(it.title ?? it.name ?? it.label ?? 'Untitled'),
+        image: String(it.image ?? it.poster ?? it.img ?? it.cover ?? it.thumbnail ?? ''),
+        overview: String(it.overview ?? it.description ?? it.summary ?? ''),
+        rating: it.rating ? String(it.rating) : undefined,
+        year: typeof it.year === 'number' ? it.year : (Number(it.year) || undefined),
+        genre: it.genre ? String(it.genre) : undefined,
+        language: it.language ? String(it.language) : undefined,
+        type: it.type ? String(it.type) : undefined,
+    })).filter(p => p.image);
+
+    return { programs };
 }
 
 export default function Home() {
     const navigate = useNavigate();
-    const { data, setData } = useData();
+    const { data, setData, setHasLoadedHome } = useData();
     const [state, setState] = useState<FetchState>(data ? 'success' : 'idle');
     const [activeIndex, setActiveIndex] = useState(0);
     const programs = data?.programs ?? [];
 
     useEffect(() => {
+        // mark home as visited
+        setHasLoadedHome(true);
+
         if (!data && state === 'idle') {
             setState('loading');
+            // Ensure your data.json is in public/ so /data.json works in dev/prod
             fetch('/data.json')
                 .then(async (res) => {
-                    if (!res.ok) throw new Error('Network error');
+                    if (!res.ok) throw new Error('Network');
                     const json = await res.json();
-                    const programs = normalizePrograms(json);
-                    setData({ programs });
+                    const normalized = normalize(json);
+                    if (normalized.programs.length === 0) throw new Error('No programs');
+                    setData(normalized);
                     setState('success');
                 })
                 .catch(() => setState('error'));
         }
-    }, [data, setData, state]);
+    }, [data, setData, state, setHasLoadedHome]);
 
     useKeyboardNav({
         onLeft: () => setActiveIndex((i) => Math.max(0, i - 1)),
@@ -54,17 +63,20 @@ export default function Home() {
         onEnter: () => {
             const target = programs[activeIndex];
             if (target) navigate(`/program/${target.id}`);
-        }
+        },
     });
 
     if (state === 'loading') {
-        // keep your existing skeleton UI; omitted here for brevity
+        // home-loading skeleton blocks
         return (
             <div className="container" data-testid="home-loading">
-                <div className="carousel-track">
-                    {Array.from({ length: 4 }).map((_, i) => (
-                        <div className="card skeleton" key={i} />
-                    ))}
+                <div className="homeLoadingGrid">
+                    <div className="skeleton homeLoading-left" />
+                    <div>
+                        <div className="skeleton homeLoading-lineSm" />
+                        <div className="skeleton homeLoading-lineMd" />
+                        <div className="skeleton homeLoading-hero" />
+                    </div>
                 </div>
             </div>
         );
@@ -85,7 +97,6 @@ export default function Home() {
                     <Carousel items={programs} activeIndex={activeIndex} />
                 </div>
             </div>
-            {/* removed keyboard usage hint per your requirement */}
         </div>
     );
 }
